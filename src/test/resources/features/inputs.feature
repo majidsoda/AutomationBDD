@@ -1,3 +1,4 @@
+@Inputs
 Feature: UserMgt scenarios
 
   Background:

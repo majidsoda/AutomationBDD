@@ -8,19 +8,28 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 public class BrowserUtils {
     private BrowserUtils(){};
     private static WebDriver driver = null;
 
-    public static WebDriver getDriver(){
-        if (driver == null){
-            initializeDriver("chrome");
+    public static WebDriver getDriver() {
+        if (driver == null) {
+            if (ConfigReader.readProperty("config.properties", "runInSaucelabs")
+                    .equalsIgnoreCase("true")) {
+                getRemoteDriver();
+            } else {
+                initializeDriver("chrome");
+            }
         }
         return driver;
     }
@@ -54,7 +63,24 @@ public class BrowserUtils {
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         driver.get(ConfigReader.readProperty("Config.properties","url"));
     }
+    private static void getRemoteDriver(){
+        String sauceKey = "3f8b270b-1ad1-446c-98e2-bcb331403032";
+        String sauceUsername = "oauth-majidsoda-9e4b6";
+        String url = "https://" + sauceUsername + ":" + sauceKey + "@ondemand.us-west-1.saucelabs.com:443/wd/hub";
 
+        try{
+            DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+            capabilities.setCapability("version", "111");
+            capabilities.setCapability("platform", "Windows 11");
+            driver = new RemoteWebDriver(new URL(url), capabilities);
+
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+       // driver.manage().window().maximize();
+        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        driver.get(ConfigReader.readProperty("Config.properties","url"));
+    }
     public static void switchToNewWindow(){
         for(String each: driver.getWindowHandles()){
             if(!each.equalsIgnoreCase(driver.getWindowHandle())) {

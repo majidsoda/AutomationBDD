@@ -1,7 +1,7 @@
 @HomeScenarios
 Feature: HomePage scenarios
 
-   @US1021
+  @US1021
   Scenario:Test Header
     #Given I navigate to homepage
     Then I should see header as "Automation with Selenium"
